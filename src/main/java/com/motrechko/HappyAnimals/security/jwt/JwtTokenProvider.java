@@ -26,11 +26,14 @@ public class JwtTokenProvider {
     private String secret;
     @Value("${jwt.token.expired}")
     private long validityInMilliseconds;
-    @Autowired
-    private UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
+
+    public JwtTokenProvider(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder(){
+    public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -49,7 +52,7 @@ public class JwtTokenProvider {
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(validity)
-                .signWith(SignatureAlgorithm.ES256,secret)
+                .signWith(SignatureAlgorithm.HS256,secret)
                 .compact();
     }
 
@@ -64,7 +67,7 @@ public class JwtTokenProvider {
 
     public String resolveToken(HttpServletRequest request){
         String bearerToken = request.getHeader("Authorization");
-        if(bearerToken != null && bearerToken.startsWith("Bearer_")){
+        if(bearerToken != null && bearerToken.startsWith("Bearer ")){
             return bearerToken.substring(7,bearerToken.length());
         }
         return null;
@@ -73,10 +76,7 @@ public class JwtTokenProvider {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
 
-            if(claims.getBody().getExpiration().before(new Date())){
-                return false;
-            }
-            return true;
+            return !claims.getBody().getExpiration().before(new Date());
         }catch (JwtException | IllegalArgumentException e){
             throw new JwtAuthenticationException(" Jwt token is expired or invalid");
         }

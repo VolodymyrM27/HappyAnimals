@@ -1,11 +1,14 @@
 package com.motrechko.HappyAnimals.contorllers;
 
+import com.motrechko.HappyAnimals.dto.UserDto;
 import com.motrechko.HappyAnimals.entity.User;
 import com.motrechko.HappyAnimals.repository.UserRepository;
 import com.motrechko.HappyAnimals.exception.EmployeeNotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class EmployeeController {
@@ -18,20 +21,23 @@ public class EmployeeController {
 
     }
 
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/employees")
-    public List<User> all() {
-        return repository.findAll();
+    public List<UserDto> all() {
+
+        return repository.findAll().stream().map(UserDto::fromUser).collect(Collectors.toList());
     }
 
     @PostMapping(path = "/employees", consumes="application/json")
     public User newEmployee(@RequestBody User employee){
         return repository.save(employee);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/employees/{id}")
-    public User one(@PathVariable Long id) {
+    public UserDto one(@PathVariable Long id) {
 
         return repository.findById(id)
+                .map(UserDto::fromUser)
                 .orElseThrow(() -> new EmployeeNotFoundException(id));
     }
 

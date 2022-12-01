@@ -6,6 +6,7 @@ import com.motrechko.HappyAnimals.repository.RoleRepository;
 import com.motrechko.HappyAnimals.repository.UserRepository;
 import com.motrechko.HappyAnimals.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +20,9 @@ public class UserServiceImpl implements UserService {
 
     private  final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final BCryptPasswordEncoder  bCryptPasswordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, @Lazy BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
@@ -53,7 +54,7 @@ public class UserServiceImpl implements UserService {
     public User findByEmail(String email) {
         User result = userRepository.findByEmail(email);
         log.info("IN findByEmail - user: {} found by username: {}", result,email);
-        return null;
+        return result;
     }
 
     @Override
