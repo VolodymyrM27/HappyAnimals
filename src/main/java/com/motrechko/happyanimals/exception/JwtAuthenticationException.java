@@ -1,4 +1,4 @@
-package com.motrechko.happyanimals.security.jwt;
+package com.motrechko.happyanimals.exception;
 
 
 import org.springframework.security.core.AuthenticationException;

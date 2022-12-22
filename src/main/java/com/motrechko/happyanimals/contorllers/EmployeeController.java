@@ -5,6 +5,7 @@ import com.motrechko.happyanimals.dto.TaskDto;
 import com.motrechko.happyanimals.dto.UserDto;
 import com.motrechko.happyanimals.entity.User;
 import com.motrechko.happyanimals.exception.EmployeeNotFoundException;
+import com.motrechko.happyanimals.security.jwt.JwtMapper;
 import com.motrechko.happyanimals.service.impl.UserServiceImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -38,12 +39,20 @@ public class EmployeeController {
         );
     }
 
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/employees/{id}")
     public UserDto one(@PathVariable Long id) {
         return userService.findById(id)
                 .map(UserDto::fromUser)
-                .orElseThrow( () -> new EmployeeNotFoundException(id));
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    @GetMapping("/employees/me")
+    public UserDto getCurrentUser() {
+        return userService.findById(JwtMapper.getId())
+                .map(UserDto::fromUser)
+                .orElseThrow(EmployeeNotFoundException::new);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -68,7 +77,7 @@ public class EmployeeController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping(path = "/employees/{id}/task", consumes = "application/json")
+    @GetMapping(path = "/employees/{id}/task")
     public List<TaskDto> getAllTasks(@PathVariable Long id) {
         return userService.getAllTasks(id)
                 .stream()

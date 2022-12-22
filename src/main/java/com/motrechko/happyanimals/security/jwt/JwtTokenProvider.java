@@ -1,6 +1,7 @@
 package com.motrechko.happyanimals.security.jwt;
 
 import com.motrechko.happyanimals.entity.Role;
+import com.motrechko.happyanimals.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
